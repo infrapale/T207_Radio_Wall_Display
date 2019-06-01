@@ -123,8 +123,8 @@
 
 
 #define TEXT_SIZE 2
-#define TEXT_VISIBLE_ROWS 30
-#define TEXT_VISIBLE_CHAR 50
+#define TEXT_VISIBLE_ROWS 15
+#define TEXT_VISIBLE_CHAR 25
 
 char text_buffer[TEXT_VISIBLE_ROWS][TEXT_VISIBLE_CHAR];
 uint8_t show_from=0;
@@ -151,7 +151,7 @@ void setup() {
   tft.setRotation(1);
   tft.fillScreen(ILI9341_BLACK);
   tft.setCursor(0, 0);
-  tft.setTextColor(ILI9341_WHITE);  tft.setTextSize(1);
+  tft.setTextColor(ILI9341_WHITE);  tft.setTextSize(2);
 
   tft.println("T195 Radio Monitor 2018");
   tft.print("RST pin = "); tft.println(RFM69_RST,DEC);
@@ -186,12 +186,6 @@ void setup() {
   // ishighpowermodule flag set like this:
   rf69.setTxPower(20, true);  // range from 14-20 for power, 2nd arg must be true for 69HCW
 
-  // The encryption key has to be the same as the one in the server
-  //uint8_t key[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-  //                  0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
-                    
-  //uint8_t key[] = { 0x73 ,0x61 ,0x6d ,0x70 ,0x6c ,0x65 ,0x45 ,0x6e,
-  //                 0x63 ,0x72 ,0x79 ,0x70 ,0x74 ,0x4b ,0x65 ,0x79};
   //              1234567890123456
   //uint8_t key[] ="Xyzabde123456789"; //exactly the same 16 characters/bytes on all nodes!
 
@@ -269,7 +263,7 @@ void printText(void){
   row = insert_at;
   tft.fillScreen(ILI9341_BLACK);
   tft.setCursor(0, 0);
-  tft.setTextColor(ILI9341_WHITE);  tft.setTextSize(1);
+  tft.setTextColor(ILI9341_WHITE);  tft.setTextSize(2);
 
   for(i=0;i< TEXT_VISIBLE_ROWS;i++){
     tft.println(text_buffer[row]);
