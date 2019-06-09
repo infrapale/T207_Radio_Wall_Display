@@ -16,6 +16,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_ILI9341.h>
 #include "Secret.h"
+#include "sens_db.h"
 
 #ifdef ESP8266
    #define STMPE_CS 16
@@ -143,7 +144,7 @@ void setup() {
   Serial.begin(115200);
   //while (!Serial) { delay(1); } // wait until serial console is open, remove if not tethered to computer
 
-  Serial.println("T195 Radio Monitor!");
+  Serial.println("T207 Radio Wall Display");
 
   tft.begin();
   add_row_millis = millis();
@@ -153,7 +154,7 @@ void setup() {
   tft.setCursor(0, 0);
   tft.setTextColor(ILI9341_WHITE);  tft.setTextSize(2);
 
-  tft.println("T195 Radio Monitor 2018");
+  tft.println("T207 Radio Display 2019");
   tft.print("RST pin = "); tft.println(RFM69_RST,DEC);
   tft.print("CS pin = ");tft.println(RFM69_CS,DEC);
   tft.print("INT pin = ");tft.println(RFM69_INT,DEC);
@@ -195,6 +196,8 @@ void setup() {
 
   tft.print("RFM69 radio @");  tft.print((int)RF69_FREQ,DEC);  tft.println(" MHz");
 
+  // Test code
+  test_sens_db();
 
  
 }
