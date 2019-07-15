@@ -15,6 +15,10 @@
 #include <SPI.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_ILI9341.h>
+#include <Fonts/FreeMonoBoldOblique12pt7b.h>
+#include <Fonts/FreeSerif18pt7b.h>
+#include <Fonts/FreeSerif24pt7b.h>
+#include <Fonts/FreeSerif9pt7b.h>
 #include "Secret.h"
 #include "sens_db.h"
 
@@ -152,8 +156,10 @@ void setup() {
   tft.setRotation(1);
   tft.fillScreen(ILI9341_BLACK);
   tft.setCursor(0, 0);
-  tft.setTextColor(ILI9341_WHITE);  tft.setTextSize(2);
-
+  tft.setTextColor(ILI9341_WHITE);  
+  //tft.setTextSize(2);
+  tft.setFont(&FreeSerif24pt7b);
+  //tft.setFont(&FreeMonoBoldOblique12pt7b);
   tft.println("T207 Radio Display 2019");
   tft.print("RST pin = "); tft.println(RFM69_RST,DEC);
   tft.print("CS pin = ");tft.println(RFM69_CS,DEC);
@@ -199,8 +205,8 @@ void setup() {
   // Test code
   test_sens_db();
 
-  parse_msg("{\"Z\":\"Dock\",\"S\":\"P_bmp180\",\"V\":997.00,\"R\":\"\"}");
- 
+  parse_msg("{\"Z\":\"Dock\",\"S\":\"Temp\",\"V\":997.00,\"R\":\"\"}");
+  update_display();
 }
 
 
@@ -223,7 +229,8 @@ void loop(void) {
       Serial.println(rf69.lastRssi(), DEC);
       AddRow((char*)buf);
       parse_msg((char*)buf);
-      printMsgLog();
+      update_display();
+      //printMsgLog();
 
       if (strstr((char *)buf, "Hello World")) {
         // Send a reply!
@@ -260,6 +267,30 @@ void AddRow( char *txt){
    
  
    Serial.println(txt);
+}
+
+void update_display(void){
+  tft.fillScreen(ILI9341_BLACK);
+  tft.setCursor(0, 30);
+  tft.setTextColor(ILI9341_RED); 
+  tft.setFont(&FreeSerif24pt7b); 
+  tft.setTextColor(ILI9341_LIGHTGREY);
+  tft.println("Villa Astrid");
+  //setTextColor(uint16_t c, uint16_t bg)
+  for (int i = 0; i < NBR_COLLECTED_SENSORS; i++){
+    switch(i){
+      case 0: tft.setTextColor(ILI9341_RED);
+        break;
+      case 1: tft.setTextColor(ILI9341_OLIVE);
+        break;
+      case 2: tft.setTextColor(ILI9341_NAVY);
+        break;
+        
+    }
+    tft.print(collect_sens[i].name);
+    tft.print(" ");
+    tft.println(collect_sens[i].value);  
+  }
 }
 
 void printMsgLog(void){
