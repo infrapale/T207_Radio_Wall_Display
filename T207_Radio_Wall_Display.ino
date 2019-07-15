@@ -123,9 +123,9 @@
 #endif
 
 
-#define TEXT_SIZE 2
-#define TEXT_VISIBLE_ROWS 15
-#define TEXT_VISIBLE_CHAR 25
+#define TEXT_SIZE 1
+#define TEXT_VISIBLE_ROWS 25
+#define TEXT_VISIBLE_CHAR 44
 
 char text_buffer[TEXT_VISIBLE_ROWS][TEXT_VISIBLE_CHAR];
 uint8_t show_from=0;
@@ -199,6 +199,7 @@ void setup() {
   // Test code
   test_sens_db();
 
+  parse_msg("{\"Z\":\"Dock\",\"S\":\"P_bmp180\",\"V\":997.00,\"R\":\"\"}");
  
 }
 
@@ -221,7 +222,8 @@ void loop(void) {
       Serial.print("RSSI: ");
       Serial.println(rf69.lastRssi(), DEC);
       AddRow((char*)buf);
-      printText();
+      parse_msg((char*)buf);
+      printMsgLog();
 
       if (strstr((char *)buf, "Hello World")) {
         // Send a reply!
@@ -260,13 +262,13 @@ void AddRow( char *txt){
    Serial.println(txt);
 }
 
-void printText(void){
+void printMsgLog(void){
   uint8_t i;
   uint8_t row;
   row = insert_at;
   tft.fillScreen(ILI9341_BLACK);
   tft.setCursor(0, 0);
-  tft.setTextColor(ILI9341_WHITE);  tft.setTextSize(2);
+  tft.setTextColor(ILI9341_WHITE);  tft.setTextSize(1);
 
   for(i=0;i< TEXT_VISIBLE_ROWS;i++){
     tft.println(text_buffer[row]);
