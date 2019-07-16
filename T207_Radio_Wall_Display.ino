@@ -15,6 +15,7 @@
 #include <SPI.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_ILI9341.h>
+#include <Adafruit_STMPE610.h>
 #include <Fonts/FreeMonoBoldOblique12pt7b.h>
 #include <Fonts/FreeSerif18pt7b.h>
 #include <Fonts/FreeSerif24pt7b.h>
@@ -131,15 +132,20 @@
 #define TEXT_VISIBLE_ROWS 25
 #define TEXT_VISIBLE_CHAR 44
 
+#define TS_MINX 150
+#define TS_MINY 130
+#define TS_MAXX 3800
+#define TS_MAXY 4000
+
 char text_buffer[TEXT_VISIBLE_ROWS][TEXT_VISIBLE_CHAR];
 uint8_t show_from=0;
 uint8_t insert_at=0;
-unsigned long add_row_millis;
-unsigned long print_all_millis;
+unsigned long show_menu_millis;
+boolean menu_is_active;
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 // Singleton instance of the radio driver
 RH_RF69 rf69(RFM69_CS, RFM69_INT);
-
+Adafruit_STMPE610 ts = Adafruit_STMPE610(STMPE_CS);
 int16_t packetnum = 0;  // packet counter, we increment per xmission
 
 void setup() {
@@ -151,8 +157,14 @@ void setup() {
   Serial.println("T207 Radio Wall Display");
 
   tft.begin();
-  add_row_millis = millis();
-  print_all_millis = millis();
+  if (!ts.begin()) { 
+    Serial.println("Unable to start touchscreen.");
+  } 
+  else { 
+    Serial.println("Touchscreen started."); 
+  }
+  show_menu_millis = millis();
+  menu_is_active = false;
   tft.setRotation(1);
   tft.fillScreen(ILI9341_BLACK);
   tft.setCursor(0, 0);
@@ -206,7 +218,12 @@ void setup() {
   test_sens_db();
 
   parse_msg("{\"Z\":\"Dock\",\"S\":\"Temp\",\"V\":997.00,\"R\":\"\"}");
-  update_display();
+  if( show_menu_millis > millis()){
+    show_menu();
+  }
+  else {
+    update_display();
+  }
 }
 
 
@@ -229,8 +246,13 @@ void loop(void) {
       Serial.println(rf69.lastRssi(), DEC);
       AddRow((char*)buf);
       parse_msg((char*)buf);
-      update_display();
       //printMsgLog();
+      if( show_menu_millis > millis()){
+        //show_menu();
+      }
+      else {
+        update_display();
+      }
 
       if (strstr((char *)buf, "Hello World")) {
         // Send a reply!
@@ -244,13 +266,44 @@ void loop(void) {
       Serial.println("Receive failed");
     }
   }
-    
+  // The touchscreen part is still not utilized
+  if (! ts.bufferEmpty()){
+     TS_Point p = ts.getPoint();
+     p.x = map(p.x, TS_MINX, TS_MAXX, 0, tft.width());
+     p.y = map(p.y, TS_MINY, TS_MAXY, 0, tft.height());
+     //if (ts.touched())
+     Serial.print(p.x); Serial.print(" - ");Serial.println(p.y);
+     show_menu_millis = millis() + 5000;
+     menu_is_active = true;
+     show_menu();
+  }
+
+  if( show_menu_millis > millis()){
+        //show_menu();
+  }
+  else {
+    if(menu_is_active)
+      update_display();
+      menu_is_active = false;
+  }
+
+   
   /*  if(millis()-print_all_millis > 2000){
       Serial.println("Now printing");
       printText();
       print_all_millis = millis();
     }
   */  
+}
+void show_menu(){
+  tft.fillScreen(ILI9341_BLACK);
+  tft.setCursor(0, 30);
+  tft.setTextColor(ILI9341_RED); 
+  tft.setFont(&FreeSerif24pt7b); 
+  tft.setTextColor(ILI9341_LIGHTGREY);
+  tft.println("Menu is under");
+  tft.println("construction");
+  
 }
 
 void AddRow( char *txt){
@@ -281,9 +334,9 @@ void update_display(void){
     switch(i){
       case 0: tft.setTextColor(ILI9341_RED);
         break;
-      case 1: tft.setTextColor(ILI9341_OLIVE);
+      case 1: tft.setTextColor(ILI9341_YELLOW);
         break;
-      case 2: tft.setTextColor(ILI9341_NAVY);
+      case 2: tft.setTextColor(ILI9341_CYAN);
         break;
         
     }
